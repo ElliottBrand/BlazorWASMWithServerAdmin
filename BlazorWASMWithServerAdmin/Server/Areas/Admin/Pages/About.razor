@@ -1,0 +1,96 @@
+﻿@page "/about"
+@inject IAboutService aboutService 
+
+<section>
+    <header>
+        <h1>About Administration</h1>
+    </header>
+    <div>
+        @if (aboutModel == null)
+        {
+            <div>Loading...</div>
+        }
+        else
+        {
+            <EditForm Model="aboutModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text">Title</label>
+                    </div>
+                    <InputText class="form-control" @bind-Value="@aboutModel.Title" />
+                </div>
+
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text">Details</label>
+                    </div>
+                    <InputTextArea class="form-control" @bind-Value="@aboutModel.Details" />
+                </div>
+
+                @if (!updating)
+                {
+                    <button class="btn btn-dark">Update</button>
+                }
+                else
+                {
+                    <div class="d-inline-block">Updating...</div>
+                }
+
+                @if (showSuccess)
+                {
+                    <div class="alert alert-success mt-2">Successfully updated!</div>
+                }
+            </EditForm>
+
+            @if (showError)
+            {
+                <div class="alert alert-danger mt-2">An error occurred while processing your request.</div>
+            }
+        }
+    </div>
+</section>
+
+@code {
+    AboutModel aboutModel;
+    bool updating;
+    bool showSuccess;
+    bool showError;
+    int count;
+
+    protected override async Task OnInitializedAsync()
+    {
+        aboutModel = await aboutService.GetAboutAsync();
+    }
+
+    async void HandleValidSubmit()
+    {
+        showError = false;
+        updating = true;
+        StateHasChanged();
+
+        var updated = await aboutService.UpdateAboutAsync(aboutModel);
+        if (updated)
+        {
+            updating = false;
+            showSuccess = true;
+            StateHasChanged();
+
+            await Task.Delay(2000);
+            showSuccess = false;
+            StateHasChanged();
+        }
+        else
+        {
+            updating = false;
+            showError = true;
+            StateHasChanged();
+        }
+    }
+
+    void Testing()
+    {
+        count = count + 1;
+    }
+}

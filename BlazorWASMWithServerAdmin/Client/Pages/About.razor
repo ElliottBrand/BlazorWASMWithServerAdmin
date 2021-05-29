@@ -1,0 +1,36 @@
+﻿@page "/about"
+@inject IHttpClientFactory httpClientFactory
+
+@if (aboutModel == null && !hasError)
+{
+    <div>Loading...</div>
+}
+else if (!hasError)
+{
+    <h3>@aboutModel.Title</h3>
+    <div>@aboutModel.Details</div>
+}
+
+@if (hasError)
+{
+    <div class="alert alert-danger text-center">Sorry, an error occurred.</div>
+}
+
+@code {
+    AboutModel aboutModel;
+    bool hasError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var httpClient = httpClientFactory.CreateClient("BlazorWASMWithServerAdmin.AnonymousAPI");
+        var response = await httpClient.GetAsync("/api/About");
+        if (response.IsSuccessStatusCode)
+        {
+            aboutModel = await response.Content.ReadFromJsonAsync<AboutModel>();
+        }
+        else
+        {
+            hasError = true;
+        }
+    }
+}
